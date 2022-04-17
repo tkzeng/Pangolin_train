@@ -1,0 +1,297 @@
+from subprocess import call
+import numpy as np
+import pandas as pd
+from pybedtools import BedTool
+
+SPECIES = config["SPECIES"]
+
+if SPECIES == "Human":
+    REF = "GRCh38.primary_assembly.genome.fa"
+    GTF = "gencode.v34.annotation.gtf"
+    GFF = ""
+elif SPECIES == "Macaque":
+    REF = "Macaca_mulatta.Mmul_10.dna.toplevel.fa"
+    GTF = "Macaca_mulatta.Mmul_10.100.chr.gtf"
+    GFF = "Macaca_mulatta.Mmul_10.100.chr.gff"
+elif SPECIES == "Mouse":
+    REF = "GRCm38.primary_assembly.genome.fa"
+    GTF = "gencode.vM25.annotation.gtf"
+    GFF = "gencode.vM25.annotation.gff"
+elif SPECIES == "Chimp":
+    REF = "Pan_troglodytes.Pan_tro_3.0.dna.toplevel.fa"
+    GTF = "Pan_troglodytes.Pan_tro_3.0.101.chr.gtf"
+    GFF = "Pan_troglodytes.Pan_tro_3.0.101.chr.gff"
+elif SPECIES == "Rat":
+    REF = "Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa"
+    GTF = "Rattus_norvegicus.Rnor_6.0.101.chr.gtf"
+    GFF = "Rattus_norvegicus.Rnor_6.0.101.chr.gff"
+    CHROMS = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 X Y"
+
+FILE_IDS = "6110sTS.Macaque.Brain.14ypb.Male 6111sTS.Macaque.Brain.15ypb.Male 5396sTS.Macaque.Heart.14ypb.Male 6120sTS.Macaque.Heart.15ypb.Male 5482sTSm.Macaque.Liver.14ypb.Male 6114sTS.Macaque.Liver.14ypb.Male 5410sTS.Macaque.Testis.15ypb.Male 5435sTS.Macaque.Testis.14ypb.Male 5413sTS.Macaque.Brain.21ypb.Male 6121sTS.Macaque.Heart.20ypb.Male 5461sTS.Macaque.Brain.22ypb.Male 6076sTS.Macaque.Brain.3ypb.Male 6084sTS.Macaque.Brain.3ypb.Male 5422sTS.Macaque.Heart.3ypb.Male 5436sTS.Macaque.Heart.3ypb.Male 5454sTS.Macaque.Liver.3ypb.Male 6077sTS.Macaque.Liver.3ypb.Male 6085sTS.Macaque.Heart.8ypb.Female 6086sTS.Macaque.Liver.8ypb.Female 5501sTS.Macaque.Brain.9ypb.Male 5988sTS.Macaque.Brain.9ypb.Male 5420sTS.Macaque.Heart.9ypb.Male 5450sTS.Macaque.Heart.9ypb.Male 5425sTS.Macaque.Liver.9ypb.Male 5993sTS.Macaque.Liver.9ypb.Male 6089sTS.Macaque.Liver.9ypb.Female 5373sTS.Macaque.Testis.9ypb.Male 5414sTS.Macaque.Testis.9ypb.Male 1892sTS.Mouse.Brain.4wpb.Male 1896sTS.Mouse.Brain.4wpb.Male 1936sTS.Mouse.Brain.4wpb.Female 1940sTS.Mouse.Brain.4wpb.Female 2655sTS.Mouse.Heart.4wpb.Female 2657sTS.Mouse.Heart.4wpb.Female 2659sTS.Mouse.Heart.4wpb.Male 2661sTS.Mouse.Heart.4wpb.Male 1894sTS.Mouse.Liver.4wpb.Male 1898sTS.Mouse.Liver.4wpb.Male 1938sTS.Mouse.Liver.4wpb.Female 1942sTS.Mouse.Liver.4wpb.Female 1895sTS.Mouse.Testis.4wpb.Male 1899sTS.Mouse.Testis.4wpb.Male 1944sTS.Mouse.Brain.9wpb.Male 1948sTS.Mouse.Brain.9wpb.Female 1954sTS.Mouse.Brain.9wpb.Male 1960sTS.Mouse.Brain.9wpb.Female 1950sTS.Mouse.Heart.9wpb.Female 1956sTS.Mouse.Heart.9wpb.Male 2663sTS.Mouse.Heart.9wpb.Male 2669sTS.Mouse.Heart.9wpb.Female 1946sTS.Mouse.Liver.9wpb.Male 1952sTS.Mouse.Liver.9wpb.Female 1958sTS.Mouse.Liver.9wpb.Male 1962sTS.Mouse.Liver.9wpb.Female 1947sTS.Mouse.Testis.9wpb.Male 1959sTS.Mouse.Testis.9wpb.Male 5822sTS.Human.Heart.13ypb.Male 5526sTS.Human.Testis.16ypb.Male 5532sTS.Human.Brain.16ypb.Male 5546sTS.Human.Testis.17ypb.Male 5575sTS.Human.Liver.17ypb.Male 5518sTS.Human.Testis.55ypb.Male 5512sTS.Human.Liver.58ypb.Male 5524sTS.Human.Brain.58ypb.Male 5571sTS.Human.Liver.58ypb.Male 5836sTS.Human.Heart.127dpb.Male 5818sTS.Human.Heart.226dpb.Male 6095sTS.Human.Testis.46ypb.Male 6043sTS.Human.Heart.54ypb.Male 6106sTS.Human.Liver.55ypb.Male 5843sTS.Human.Heart.0dpb.Female 5905sTS.Human.Heart.94dpb.Male 5513sTS.Human.Liver.7ypb.Male 5537sTS.Human.Brain.8ypb.Male 6100sTS.Human.Heart.4ypb.Female 6042sTS.Human.Heart.25ypb.Male 6048sTS.Human.Brain.28ypb.Male 6107sTS.Human.Testis.28ypb.Male 5531sTS.Human.Brain.29ypb.Male 5535sTS.Human.Testis.29ypb.Male 5536sTS.Human.Liver.29ypb.Male 5566sTS.Human.Testis.29ypb.Male 5908sTS.Human.Brain.29ypb.Male 5533sTS.Human.Brain.39ypb.Male 5550sTS.Human.Testis.39ypb.Male 5551sTS.Human.Liver.39ypb.Male 5563sTS.Human.Liver.39ypb.Male 5574sTS.Human.Brain.39ypb.Male 1875sTS.Rat.Brain.6wpb.Male 1975sTS.Rat.Brain.6wpb.Female 2356sTS.Rat.Brain.16wpb.Male 2369sTS.Rat.Testis.16wpb.Male 2747sTS.Rat.Heart.16wpb.Male 1969sTS.Rat.Liver.6wpb.Male 2287sTS.Rat.Liver.6wpb.Female 2358sTS.Rat.Testis.16wpb.Male 2370sTS.Rat.Liver.16wpb.Male 2749sTS.Rat.Heart.16wpb.Male 1970sTS.Rat.Testis.6wpb.Male 2348sTS.Rat.Brain.16wpb.Female 2359sTS.Rat.Liver.16wpb.Male 2738sTS.Rat.Heart.6wpb.Female 2751sTS.Rat.Heart.6wpb.Male 1971sTS.Rat.Brain.6wpb.Male 2351sTS.Rat.Liver.16wpb.Female 2363sTS.Rat.Brain.6wpb.Female 2740sTS.Rat.Heart.6wpb.Female 2853sTS.Rat.Heart.16wpb.Female 1973sTS.Rat.Liver.6wpb.Male 2352sTS.Rat.Brain.16wpb.Female 2366sTS.Rat.Liver.6wpb.Female 2742sTS.Rat.Heart.6wpb.Male 1974sTS.Rat.Testis.6wpb.Male 2355sTS.Rat.Liver.16wpb.Female 2367sTS.Rat.Brain.16wpb.Male 2746sTS.Rat.Heart.16wpb.Female".split()
+
+tmp = []
+for file in FILE_IDS:
+    if SPECIES in file:
+        tmp.append(file)
+FILE_IDS = tmp
+
+TISSUE_IDS = ["Heart", "Liver", "Brain", "Testis"]
+
+rule all:
+     input:
+         #"Human_to_%s.gff" % SPECIES,
+         #"%s_to_Human.gff" % SPECIES
+         #expand("%s.{id}.usage.bed" % SPECIES, id=TISSUE_IDS)
+         #"%s.merged.usage.bed" % SPECIES
+         #"splice_table_%s.test.txt" % SPECIES
+         expand("%s.{id}.tsv" % SPECIES, id=TISSUE_IDS)
+
+rule spliser_input_tsv:
+    output:
+        expand("%s.{id}.tsv" % SPECIES, id=TISSUE_IDS)
+    run:
+        for i, tissue in enumerate(TISSUE_IDS):
+            files = []
+            for file in FILE_IDS:
+                if tissue in file:
+                    files.append("bams/%s.filtered.SpliSER.tsv" % file)    
+            fout = open(output[i], 'w')
+            ctr = 0
+            for file in files:
+                file = file[5:-21]
+                print("%s\tbams/%s.filtered.SpliSER.tsv\tbams/%s.mmr.sorted.filtered.bam" % (file, file, file), file=fout)
+                ctr += 1
+            if (SPECIES == "Mouse" or SPECIES == "Macaque") and (tissue == "Testis"):
+                assert ctr == 4
+            else:
+                assert ctr == 8
+
+rule combine:
+    input:
+        "%s.{id}.tsv" % SPECIES
+    output:
+        "%s.{id}.combined.tsv" % SPECIES
+    params:
+        id="%s.{id}" % SPECIES,
+    shell:
+        "python SpliSER/SpliSER_v0.1.3.py combine --isStranded -s rf -S {input} -o {params.id}"
+
+rule output_tsv:
+    input:
+        samples="%s.{id}.tsv" % SPECIES,
+        counts="%s.{id}.combined.tsv" % SPECIES
+    output:
+        "%s.{id}.All.diffSpliSE.tsv" % SPECIES
+    params:
+        prefix="%s.{id}." % SPECIES,
+        minreads=1
+    shell:
+        "python SpliSER/SpliSER_v0.1.3.py output -S {input.samples} -C {input.counts} -o {params.prefix} -r {params.minreads} -t diffSpliSE"
+
+# needed to fix coordinates from spliser output 
+rule five_or_three:
+    input:
+        expand("bams/{id}.filtered.SpliSER.tsv", id = FILE_IDS)
+    output:
+        combined="%s.combined.tsv" % SPECIES,
+        five_or_three="%s.sites.5or3.tsv" % SPECIES
+    shell:
+        """
+        cat {input} > {output.combined}
+        python five_or_three.py {output.combined} {output.five_or_three}
+        """
+
+rule get_sites:
+    input:
+        sites="%s.{id}.All.diffSpliSE.tsv" % SPECIES,
+        five_or_three="%s.sites.5or3.tsv" % SPECIES
+    output:
+        "%s.{id}.usage.bed" % SPECIES
+    params:
+        minreads_cont=5, # minimum total reads to calculate usage for a site
+        minreads_cat=1, # minimum split reads to deem a site spliced
+        minsamp=2 # minimum samples for both usage calculation, site classification
+    run:
+        sites = {x.split()[0]:x.split()[1] for x in open(input.five_or_three).readlines()}
+        tbl = pd.read_csv(input.sites, sep='\t')
+        fout = open(output[0], 'w')
+
+        for rownum, l in tbl.iterrows():
+            usage = []
+            nsamp = 0
+            for i in range(4, len(l), 3):
+                alpha = l.iloc[i]
+                beta = l.iloc[i+1]
+                if alpha + beta >= params.minreads_cont:
+                    usage.append(l.iloc[i+2])
+                if alpha >= params.minreads_cat:
+                    nsamp += 1
+            if nsamp >= params.minsamp:
+                if len(usage) >= params.minsamp:
+                    usage = np.mean(usage)
+                else:
+                    usage = -1 # mark sites that don't have usage calculations
+            elif nsamp > 0: # mark sites with reads in at least one sample
+                usage = -2
+            else:
+                continue
+            
+            try: # filter sites that are not only 5' or 3'
+                loc = sites["%s:%s" % (l.iloc[0], l.iloc[1])]
+            except KeyError:
+                continue
+            # fix coords
+            if loc == 'r':
+                entry = "%s\t%s\t%s\t%s,%s,%s" % (l.iloc[0], l.iloc[1]-1, l.iloc[1], l.iloc[2], loc, usage)
+            else:
+                entry = "%s\t%s\t%s\t%s,%s,%s" % (l.iloc[0], l.iloc[1], l.iloc[1]+1, l.iloc[2], loc, usage)    
+            print(entry, file=fout)
+
+rule get_sites_strict:
+    input:
+        sites="%s.{id}.All.diffSpliSE.tsv" % SPECIES,
+        five_or_three="%s.sites.5or3.tsv" % SPECIES
+    output:
+        "%s.{id}.usage.strict.bed" % SPECIES
+    params:
+        #minreads_gene=10, # minimum expected count for gene
+        minreads_cont=10, # minimum total reads to calculate usage for a site,
+        minreads_cat=1,
+        minsamp=3, # minimum samples for usage calculation, expressed genes
+        minsamp_training=1, # minimum samples used for training
+        std=0.1 # standard deviation cutoff
+    run:
+        sites = {x.split()[0]:x.split()[1] for x in open(input.five_or_three).readlines()}
+        tbl = pd.read_csv(input.sites, sep='\t')
+        fout = open(output[0], 'w')
+
+        for rownum, l in tbl.iterrows():
+            usage = []
+            nsamp = 0
+            for i in range(4, len(l), 3):
+                alpha = l.iloc[i]
+                beta = l.iloc[i+1]
+                if alpha + beta >= params.minreads_cont:
+                    usage.append(l.iloc[i+2])
+                if alpha >= params.minreads_cat:
+                    nsamp += 1
+            if len(usage) >= params.minsamp and np.std(usage) < params.std:
+                usage = np.mean(usage)
+            elif nsamp >= params.minsamp_training: # sites with less confident usage estimates
+                usage = -1
+            else:
+                continue
+
+            try: # filter sites that are not only 5' or 3'
+                loc = sites["%s:%s" % (l.iloc[0], l.iloc[1])]
+            except KeyError:
+                continue
+            # fix coords
+            if loc == 'r':
+                entry = "%s\t%s\t%s\t%s,%s,%s" % (l.iloc[0], l.iloc[1]-1, l.iloc[1], l.iloc[2], loc, usage)
+            else:
+                entry = "%s\t%s\t%s\t%s,%s,%s" % (l.iloc[0], l.iloc[1], l.iloc[1]+1, l.iloc[2], loc, usage)
+            print(entry, file=fout)
+
+rule rsem_merge:
+    input:
+        expand("{id}.rsem.genes.results", id = FILE_IDS)
+    output:
+        "%s.rsem.genes.matrix" % SPECIES
+    shell:
+        "./RSEM-1.3.3/rsem-generate-data-matrix {input} > {output}"
+
+# for eval, strict: replace "%s.{id}.usage.bed" with "%s.{id}.usage.strict.bed"
+rule merge_tissues:
+    input:
+        usage=expand("%s.{id}.usage.bed" % SPECIES, id=TISSUE_IDS)
+    output:
+        "%s.merged.usage.bed" % SPECIES
+    shell:
+        "bedtools unionbedg -filler ,, -i {input.usage} > {output}"
+
+# for training: comment out "if tpm" statements
+# for eval, strict: sites="%s.merged.usage.strict.bed" % SPECIES
+rule splice_table:
+    input:
+        sites="%s.merged.usage.bed" % SPECIES,
+        gtf=GTF,
+        five_or_three="%s.sites.5or3.tsv" % SPECIES,
+        exp="%s.rsem.genes.matrix" % SPECIES
+    output:
+        "splice_table_%s.txt" % SPECIES
+    run:
+        #get expressed genes
+        # exp = pd.read_csv(input.exp, sep='\t', header=0, index_col=0)
+        # expr = {}
+        # for tissue in ["Heart","Liver","Brain","Testis"]:
+        #     exp = exp.loc[:, exp.columns.str.contains(tissue)]
+        #     for gene, count in exp.iterrows():
+        #         try:
+        #             expr[gene].append(count.mean())
+        #         except KeyError:
+        #             expr[gene] = [count.mean()]
+
+        snps = BedTool(input.sites)
+        genes = BedTool(input.gtf)
+        intersection = genes.intersect(snps, wa=True, wb=True)
+        gene_dict, snps_list = {}, []
+        for snp in intersection:
+            if snp.fields[2] == "gene":
+                h, l, b, t = snp.fields[-4].split(','), snp.fields[-3].split(','), snp.fields[-2].split(','), snp.fields[-1].split(',')
+                strand = ''.join(set([h[0],l[0],b[0],t[0]]))
+                lr = ''.join(set([h[1],l[1],b[1],t[1]]))
+                assert strand in ['','+','-','+-','-+']
+                assert lr in ['','l','r','lr','rl']
+                if (strand != '+' and strand != '-') or strand != snp.fields[6] or (lr != 'l' and lr != 'r'): # check that gene and site have the same strand
+                    continue
+                gene = snp["gene_id"]
+                # tpm = expr[gene]
+                # if tpm[0] < 2.5:
+                #    h[2] = -3
+                # if tpm[1] < 2.5:
+                #    l[2] = -3
+                # if tpm[2] < 2.5:
+                #    b[2] = -3
+                # if tpm[3] < 2.5:
+                #    t[2] = -3
+                snps_list.append(snp.chrom+':'+snp.fields[-2])
+                entry = "%s:%s,%s,%s,%s" % (snp.fields[-5],h[2],l[2],b[2],t[2])
+                try:
+                    gene_dict["%s,%s,%s,%s,%s" % (snp.chrom,gene,snp.start,snp.end,strand)].append(entry)
+                except KeyError:
+                    gene_dict["%s,%s,%s,%s,%s" % (snp.chrom,gene,snp.start,snp.end,strand)] = [entry]
+        fout = open(output[0], 'w')
+        for gene, snps in gene_dict.items():
+            gene = gene.split(',')
+            fout.write("%s\t0\t%s\t%s\t%s\t%s\t%s\n" % (gene[1],gene[0],gene[-1],gene[2],gene[3],';'.join(snps)+';'))
+
+# map from human to _
+rule liftoff:
+    input:
+        target=REF,
+        human="GRCh38.primary_assembly.genome.fa",
+        gff="gencode.v34.annotation.gff_db"
+    output:
+        gff="Human_to_%s.gff" % SPECIES,
+        unmapped="Human_to_%s.unmapped.txt" % SPECIES
+    params:
+        "%s_liftoff" % SPECIES
+    threads: 28
+    shell:
+        "liftoff -p {threads} -db {input.gff} -o {output.gff} -dir {params} -a 0.75 -s 0.75 -flank 1 -copies -sc 0.9 -u {output.unmapped} {input.target} {input.human}"
+
+# map from _ to human
+rule liftoff_1:
+    input:
+        target="GRCh38.primary_assembly.genome.fa", # map to this genome
+        species=REF, # map from this genome
+        gff=GFF # map these annotations
+    output:
+        gff="%s_to_Human.gff" % SPECIES,
+        unmapped="%s_to_Human.unmapped.txt" % SPECIES
+    params:
+        "Human_to_%s_liftoff" % SPECIES
+    threads: 28
+    shell:
+        "liftoff -p {threads} -g {input.gff} -o {output.gff} -dir {params} -a 0.75 -s 0.75 -flank 1 -copies -sc 0.9 -u {output.unmapped} {input.target} {input.species}"
