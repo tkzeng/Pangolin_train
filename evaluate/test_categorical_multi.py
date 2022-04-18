@@ -30,18 +30,7 @@ else:
         models.append(model)
 
 ds = H5Dataset(sys.argv[2])
-val = round(0.1*len(ds))
-train = len(ds)-val
-train_ds, val_ds = data.random_split(ds, (train,val))
-train_dl = data.DataLoader(train_ds, batch_size=1)
-val_dl = data.DataLoader(ds, batch_size=6) #shuffle=True, num_workers=1, pin_memory=True)
-
-#print(len(ds))
-#dl = data.DataLoader(ds, batch_size=1)
-#print(dl)
-
-for i, x in enumerate(val_dl):
-    print(i,x)
+dl = data.DataLoader(ds, batch_size=1)
 
 spliceai_outputs = np.empty([len(dl),3,5000], dtype=np.float16)
 all_targets = np.empty([len(dl),12,5000], dtype=np.float16)
@@ -50,8 +39,7 @@ all_outputs = np.empty([len(dl),12,5000], dtype=np.float16)
 for batch_idx, (inputs, targets) in enumerate(dl):
     if batch_idx % 1000 == 0:
         print(batch_idx, flush=True)
-    if batch_idx > 1000:
-        break    
+
     all_targets[batch_idx:batch_idx+1,:,:] = targets.numpy()
 
     if spliceai:

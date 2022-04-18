@@ -2,7 +2,7 @@ import sys
 from model import *
 from torch import randperm
 from torch._utils import _accumulate
-#from utils_torch import progress_bar
+from utils_torch import progress_bar
 
 assert torch.cuda.is_available()
 
@@ -66,9 +66,9 @@ def train(epoch):
         optimizer.step()
         scheduler.step(epoch + batch_idx / iters)
 
-        print(batch_idx, len(train_dl), 'Loss: %.5f' % (train_loss/(batch_idx+1)), flush=True)
-        #progress_bar(batch_idx, len(train_dl),
-        #             'Loss: %.5f' % (train_loss/(batch_idx+1)))
+        #print(batch_idx, len(train_dl), 'Loss: %.5f' % (train_loss/(batch_idx+1)), flush=True)
+        progress_bar(batch_idx, len(train_dl),
+                     'Loss: %.5f' % (train_loss/(batch_idx+1)))
 
     return train_loss/batch_idx
 
@@ -83,9 +83,9 @@ def test():
             loss = criterion(outputs, targets)
         test_loss += float(loss)
         
-        print(batch_idx, len(val_dl), 'Loss: %.5f' % (test_loss/(batch_idx+1)), flush=True)
-        #progress_bar(batch_idx, len(val_dl),
-        #             'Loss: %.5f' % (test_loss/(batch_idx+1)))
+        #print(batch_idx, len(val_dl), 'Loss: %.5f' % (test_loss/(batch_idx+1)), flush=True)
+        progress_bar(batch_idx, len(val_dl),
+                     'Loss: %.5f' % (test_loss/(batch_idx+1)))
 
     return test_loss/batch_idx
 

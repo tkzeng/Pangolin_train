@@ -10,11 +10,11 @@
 #SBATCH -o train_log
 
 # conda env to use: /project2/yangili1/tonyzeng/software/miniconda3/envs/pytorch
-module load cuda/11.2
+#module load cuda/11.2
 
 # dataset_train_human.h5 = human training data, dataset_train_all.h5 = all species data
-#python train_multiple.py 1 ../preprocessing/dataset_train_human.h5
-#python train_multiple.py 2 ../preprocessing/dataset_train_human.h5
+#python train_multiple.py 1 ../preprocessing/dataset_train_all.h5
+python train_multiple.py 2 ../preprocessing/dataset_train_all.h5
 #python train_multiple.py 3 ../preprocessing/dataset_train_human.h5
 #python train_multiple.py 4 ../preprocessing/dataset_train_human.h5
 #python train_multiple.py 5 ../preprocessing/dataset_train_human.h5

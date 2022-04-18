@@ -31,7 +31,7 @@ else:
         model.eval()
         models.append(model)
 
-ds = H5Dataset("dataset_test_1.h5")
+ds = H5Dataset(sys.argv[2])
 dl = data.DataLoader(ds, batch_size=1)
 
 spliceai_outputs = np.empty([len(dl),3,5000], dtype=np.float16)
@@ -41,8 +41,7 @@ all_outputs = np.empty([len(dl),12,5000], dtype=np.float16)
 for batch_idx, (inputs, targets) in enumerate(dl):
     if batch_idx % 1000 == 0:
         print(batch_idx, flush=True)
-    if batch_idx > 3000:
-        break    
+
     all_targets[batch_idx:batch_idx+1,:,:] = targets.numpy()
 
     if spliceai:
