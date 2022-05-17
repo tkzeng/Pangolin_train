@@ -14,10 +14,10 @@
 
 # dataset_train_human.h5 = human training data, dataset_train_all.h5 = all species data
 #python train_multiple.py 1 ../preprocessing/dataset_train_all.h5
-python train_multiple.py 2 ../preprocessing/dataset_train_all.h5
-#python train_multiple.py 3 ../preprocessing/dataset_train_human.h5
-#python train_multiple.py 4 ../preprocessing/dataset_train_human.h5
-#python train_multiple.py 5 ../preprocessing/dataset_train_human.h5
+#python train_multiple.py 2 ../preprocessing/dataset_train_all.h5
+#python train_multiple.py 3 ../preprocessing/dataset_train_all.h5
+#python train_multiple.py 4 ../preprocessing/dataset_train_all.h5
+#python train_multiple.py 5 ../preprocessing/dataset_train_all.h5
 
 #python train_single.py 1 models/model.1.5 1 ../preprocessing/dataset_train_all.h5
 #python train_single.py 2 models/model.2.5 1 ../preprocessing/dataset_train_all.h5
