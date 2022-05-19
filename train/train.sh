@@ -1,3 +1,4 @@
+#!/bin/sh
 
 python train_multiple.py 1 ../preprocessing/dataset_train_all.h5
 python train_multiple.py 2 ../preprocessing/dataset_train_all.h5
