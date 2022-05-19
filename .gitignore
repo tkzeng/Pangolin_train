@@ -46,3 +46,13 @@ preprocessing/datafile_Human.test_3_test_all.h5
 preprocessing/dataset_test_1.h5
 preprocessing/dataset_train_all.h5
 Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa
+GRCh38.primary_assembly.genome.fa
+preprocessing/canonical_sequence_Mouse.txt
+preprocessing/canonical_sequence_Human.txt
+preprocessing/canonical_sequence_Macaque.txt
+preprocessing/canonical_sequence_Human.test.txt
+preprocessing/dataset_test_1.h5
+preprocessing/dataset_train_human.h5
+preprocessing/canonical_sequence_Rat.txt
+.git/objects/pack/tmp_pack_fiGEJs
+.git/objects/c3/a4f993eb1fbf08ef040b1e100113bde391a8e0

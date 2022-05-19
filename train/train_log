@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "train_multiple.py", line 20, in <module>
+    ds = H5Dataset(sys.argv[2])
+  File "/project2/yangili1/tonyzeng/Pangolin_train/train/model.py", line 21, in __init__
+    self.data = h5py.File(file_path, 'r', libver='latest')
+  File "/project2/yangili1/tonyzeng/software/miniconda3/envs/train_test_env/lib/python3.8/site-packages/h5py/_hl/files.py", line 507, in __init__
+    fid = make_fid(name, mode, userblock_size, fapl, fcpl, swmr=swmr)
+  File "/project2/yangili1/tonyzeng/software/miniconda3/envs/train_test_env/lib/python3.8/site-packages/h5py/_hl/files.py", line 220, in make_fid
+    fid = h5f.open(name, flags, fapl=fapl)
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/h5f.pyx", line 106, in h5py.h5f.open
+OSError: Unable to open file (bad object header version number)

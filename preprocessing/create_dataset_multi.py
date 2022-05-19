@@ -94,6 +94,5 @@ for idx in range(SEQ.shape[0]):
 
 h5f2.close()
 print(ctr)
-print "--- %s seconds ---" % (time.time() - start_time)
 
 ###############################################################################         

@@ -39,12 +39,8 @@ TISSUE_IDS = ["Heart", "Liver", "Brain", "Testis"]
 
 rule all:
      input:
-         #"Human_to_%s.gff" % SPECIES,
-         #"%s_to_Human.gff" % SPECIES
-         #expand("%s.{id}.usage.bed" % SPECIES, id=TISSUE_IDS)
-         #"%s.merged.usage.bed" % SPECIES
-         #"splice_table_%s.test.txt" % SPECIES
-         expand("%s.{id}.tsv" % SPECIES, id=TISSUE_IDS)
+         "splice_table_%s.txt" % SPECIES,
+         "splice_table_%s.test.txt" % "Human"
 
 rule spliser_input_tsv:
     output:
@@ -201,7 +197,7 @@ rule rsem_merge:
     shell:
         "./RSEM-1.3.3/rsem-generate-data-matrix {input} > {output}"
 
-# for eval, strict: replace "%s.{id}.usage.bed" with "%s.{id}.usage.strict.bed"
+# for strict eval: replace "%s.{id}.usage.bed" with "%s.{id}.usage.strict.bed"
 rule merge_tissues:
     input:
         usage=expand("%s.{id}.usage.bed" % SPECIES, id=TISSUE_IDS)
@@ -210,27 +206,57 @@ rule merge_tissues:
     shell:
         "bedtools unionbedg -filler ,, -i {input.usage} > {output}"
 
-# for training: comment out "if tpm" statements
-# for eval, strict: sites="%s.merged.usage.strict.bed" % SPECIES
+# for strict eval: sites="%s.merged.usage.strict.bed" % SPECIES
 rule splice_table:
     input:
         sites="%s.merged.usage.bed" % SPECIES,
         gtf=GTF,
-        five_or_three="%s.sites.5or3.tsv" % SPECIES,
-        exp="%s.rsem.genes.matrix" % SPECIES
     output:
         "splice_table_%s.txt" % SPECIES
     run:
+        snps = BedTool(input.sites)
+        genes = BedTool(input.gtf)
+        intersection = genes.intersect(snps, wa=True, wb=True)
+        gene_dict, snps_list = {}, []
+        for snp in intersection:
+            if snp.fields[2] == "gene":
+                h, l, b, t = snp.fields[-4].split(','), snp.fields[-3].split(','), snp.fields[-2].split(','), snp.fields[-1].split(',')
+                strand = ''.join(set([h[0],l[0],b[0],t[0]]))
+                lr = ''.join(set([h[1],l[1],b[1],t[1]]))
+                assert strand in ['','+','-','+-','-+']
+                assert lr in ['','l','r','lr','rl']
+                if (strand != '+' and strand != '-') or strand != snp.fields[6] or (lr != 'l' and lr != 'r'): # check that gene and site have the same strand
+                    continue
+                gene = snp["gene_id"]
+                snps_list.append(snp.chrom+':'+snp.fields[-2])
+                entry = "%s:%s,%s,%s,%s" % (snp.fields[-5],h[2],l[2],b[2],t[2])
+                try:
+                    gene_dict["%s,%s,%s,%s,%s" % (snp.chrom,gene,snp.start,snp.end,strand)].append(entry)
+                except KeyError:
+                    gene_dict["%s,%s,%s,%s,%s" % (snp.chrom,gene,snp.start,snp.end,strand)] = [entry]
+        fout = open(output[0], 'w')
+        for gene, snps in gene_dict.items():
+            gene = gene.split(',')
+            fout.write("%s\t0\t%s\t%s\t%s\t%s\t%s\n" % (gene[1],gene[0],gene[-1],gene[2],gene[3],';'.join(snps)+';'))
+
+rule splice_table_test:
+    input:
+        sites="%s.merged.usage.bed" % "Human",
+        gtf=GTF,
+        exp="%s.rsem.genes.matrix" % "Human"
+    output:
+        "splice_table_%s.test.txt" % "Human"
+    run:
         #get expressed genes
-        # exp = pd.read_csv(input.exp, sep='\t', header=0, index_col=0)
-        # expr = {}
-        # for tissue in ["Heart","Liver","Brain","Testis"]:
-        #     exp = exp.loc[:, exp.columns.str.contains(tissue)]
-        #     for gene, count in exp.iterrows():
-        #         try:
-        #             expr[gene].append(count.mean())
-        #         except KeyError:
-        #             expr[gene] = [count.mean()]
+        exp = pd.read_csv(input.exp, sep='\t', header=0, index_col=0)
+        expr = {}
+        for tissue in ["Heart","Liver","Brain","Testis"]:
+            exp = exp.loc[:, exp.columns.str.contains(tissue)]
+            for gene, count in exp.iterrows():
+                try:
+                    expr[gene].append(count.mean())
+                except KeyError:
+                    expr[gene] = [count.mean()]
 
         snps = BedTool(input.sites)
         genes = BedTool(input.gtf)
@@ -246,15 +272,15 @@ rule splice_table:
                 if (strand != '+' and strand != '-') or strand != snp.fields[6] or (lr != 'l' and lr != 'r'): # check that gene and site have the same strand
                     continue
                 gene = snp["gene_id"]
-                # tpm = expr[gene]
-                # if tpm[0] < 2.5:
-                #    h[2] = -3
-                # if tpm[1] < 2.5:
-                #    l[2] = -3
-                # if tpm[2] < 2.5:
-                #    b[2] = -3
-                # if tpm[3] < 2.5:
-                #    t[2] = -3
+                tpm = expr[gene]
+                if tpm[0] < 2.5:
+                    h[2] = -3
+                if tpm[1] < 2.5:
+                    l[2] = -3
+                if tpm[2] < 2.5:
+                    b[2] = -3
+                if tpm[3] < 2.5:
+                    t[2] = -3
                 snps_list.append(snp.chrom+':'+snp.fields[-2])
                 entry = "%s:%s,%s,%s,%s" % (snp.fields[-5],h[2],l[2],b[2],t[2])
                 try:

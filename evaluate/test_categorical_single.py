@@ -20,8 +20,10 @@ if spliceai:
     for i in range(1,6):
         SpliceAI.append(load_model('../SpliceAI/spliceai/models/spliceai' + str(i) + '.h5'))
 else:
-    weights = ["final.1.%s.3"%tissue,"final.2.%s.3"%tissue,"final.3.%s.3"%tissue,"final.4.%s.3"%tissue,"final.5.%s.3"%tissue]
-    weights = ["Pangolin/pangolin/models/"+weight for weight in weights]
+    prefix = sys.argv[3]
+    weights = [prefix+'/'+f for f in sys.argv[4].split(',')]
+    #weights = ["final.1.%s.3"%tissue,"final.2.%s.3"%tissue,"final.3.%s.3"%tissue,"final.4.%s.3"%tissue,"final.5.%s.3"%tissue]
+    #weights = ["Pangolin/pangolin/models/"+weight for weight in weights]
 
     models = []
     for i in range(0,len(weights)):
