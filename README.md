@@ -17,7 +17,7 @@ Inputs:
 - RNA-seq reads from ArrayExpress ([mouse](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6798), [rat](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6811), [macaque](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6813), [human](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6814)
 
 Outputs:
-- `splice_table_{species}.txt` for each species, used to generate training datasets, and `splice_table_Human.txt`, used to generate test datasets. Each line is formatted as:
+- `splice_table_{species}.txt` for each species, used to generate training datasets, and `splice_table_Human.test.txt`, used to generate test datasets. Each line is formatted as:
 ```
 gene_id paralog_marker  chromosome  strand  gene_start  gene_end  splice_site_pos:heart_usage,liver_usage,brain_usage,testis_usage,...
 # Note: paralog_marker is unused and set to 0 for all genes
@@ -32,7 +32,7 @@ Dependencies:
 - `conda create -c bioconda -n create_files_env python=2.7 h5py bedtools` or equivalent
 
 Inputs: 
-- `splice_table_{species}.txt` for each species and `splice_table_Human.txt` (included in the repository or generated from Step 1)
+- `splice_table_{species}.txt` for each species and `splice_table_Human.test.txt` (included in the repository or generated from Step 1)
 - Reference genomes for each species from [GENCODE](https://www.gencodegenes.org/) and [Ensembl](https://uswest.ensembl.org/index.html)
 
 Outputs: `dataset_train_all.h5` (all species) and `dataset_test_1.h5` (human test sequences)
