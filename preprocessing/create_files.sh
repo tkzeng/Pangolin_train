@@ -1,3 +1,4 @@
+#!/bin/sh
 
 ./grab_sequence.sh splice_table_Human.txt ../GRCh38.primary_assembly.genome.fa canonical_sequence_Human.txt
 ./grab_sequence.sh splice_table_Human.test.txt ../GRCh38.primary_assembly.genome.fa canonical_sequence_Human.test.txt
