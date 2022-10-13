@@ -4,7 +4,7 @@ The steps described below are for recreating the training and testing steps in [
 
 ### `preprocessing`
 
-Generate training and test datasets. To generate from intermediate files (`splice_table_{species}.txt` present in the repository for `{species}` = `Human`,`Macaque`,`Mouse`,`Rat` follow Step 2. To run the whole pipeline (starting from RNA-seq reads), follow Step 1 and Step 2.
+Generate training and test datasets. To generate from intermediate files (`splice_table_{species}.txt` present in the repository for `{species}` = `Human`,`Macaque`,`Mouse`,`Rat`) follow Step 2. To run the whole pipeline (starting from RNA-seq reads), follow Step 1 and Step 2.
 
 #### Step 1
 
@@ -14,7 +14,7 @@ Dependencies: [Snakemake](https://snakemake.readthedocs.io/en/stable/), [Samtool
 
 Inputs: 
 - Reference genomes and annotations from [GENCODE](https://www.gencodegenes.org/) and [Ensembl](https://uswest.ensembl.org/index.html)
-- RNA-seq reads from ArrayExpress ([mouse](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6798), [rat](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6811), [macaque](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6813), [human](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6814)
+- RNA-seq reads from ArrayExpress ([mouse](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6798), [rat](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6811), [macaque](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6813), [human](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6814))
 
 Outputs:
 - `splice_table_{species}.txt` for each species, used to generate training datasets, and `splice_table_Human.test.txt`, used to generate test datasets. Each line is formatted as:
